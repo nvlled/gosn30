@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/gen2brain/beeep"
@@ -26,12 +28,35 @@ func mapValueRange(x int16, srcMin, srcMax, tgtMin, tgtMax float32) int {
 	return int((tgtMax-tgtMin)*n + tgtMin)
 }
 
+func handleLockFile() {
+	lockFilename := ".gosn30-lock"
+	lockPath := os.Getenv("HOME") + "/" + lockFilename
+
+	if _, err := os.Stat(lockPath); !os.IsNotExist(err) && os.Getenv("NOPE") != "1" {
+		println("Another instance of this program is already running. If this is not the case,")
+		println("add an ENV variable NOPE=1 to run anyway.")
+		os.Exit(1)
+	}
+
+	if _, err := os.Create(lockPath); err != nil {
+		panic(err)
+	}
+
+	killSignal := make(chan os.Signal, 1)
+	signal.Notify(killSignal, os.Interrupt)
+	<-killSignal
+	println("removing lockfile")
+	os.Remove(lockPath)
+	os.Exit(0)
+}
+
 func main() {
 	for {
 		mode := ModeKeyb
 		gpad := gamepad.New()
 		xd := xdo.New()
 
+		go handleLockFile()
 		go gpad.StartLoop()
 
 		processKeyInput := func(event *gamepad.Event) {
