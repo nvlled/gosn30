@@ -26,6 +26,9 @@ type Window int
 
 type Xdo struct {
 	xdo      *C.xdo_t
+	ctrlDown bool
+	altDown  bool
+
 	Window   int
 	KeyDelay int
 }
@@ -61,7 +64,29 @@ func (t *Xdo) MouseClick(mouseButton int) {
 }
 
 func (t *Xdo) KeyPress(keyseq string) {
+	if t.ctrlDown {
+		keyseq = "Control_L+" + keyseq
+	}
+	if t.altDown {
+		keyseq = "Alt_L+" + keyseq
+	}
 	str := C.CString(keyseq)
+	t.ctrlDown = false
+	t.altDown = false
 	defer C.free(unsafe.Pointer(str))
 	C.xdo_send_keysequence_window(t.xdo, C.Window(t.Window), str, C.useconds_t(t.KeyDelay))
+}
+
+func (t *Xdo) EnterText(text string) {
+	str := C.CString(text)
+	defer C.free(unsafe.Pointer(str))
+	C.xdo_enter_text_window(t.xdo, C.Window(t.Window), str, C.useconds_t(t.KeyDelay))
+}
+
+func (t *Xdo) ToggleCtrl() {
+	t.ctrlDown = !t.ctrlDown
+}
+
+func (t *Xdo) ToggleAlt() {
+	t.altDown = !t.altDown
 }

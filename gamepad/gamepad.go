@@ -99,6 +99,7 @@ type State struct {
 }
 
 type Event struct {
+	gpad   *GamePad
 	Type   uint8
 	Number uint8
 	Value  int16
@@ -118,7 +119,23 @@ func (ev *Event) IsButton(button int) bool {
 }
 
 func (ev *Event) IsDpad(dpad int) bool {
-	return ev.InputType == InputDpad && ev.InputValue == dpad
+	if ev.InputType != InputDpad {
+		return false
+	}
+	dir := ev.InputValue
+	gpad := ev.gpad
+	if (dir == DirDown || dir == DirUp) && (gpad.IsDpadDown(DirLeft) || gpad.IsDpadDown(DirRight)) {
+		return false
+	}
+	return dir == dpad
+}
+
+func (ev *Event) IsLeftAnalog(dir int) bool {
+	return ev.InputType == InputAnalogLeft && ev.InputValue == dir
+}
+
+func (ev *Event) IsRightAnalog(dir int) bool {
+	return ev.InputType == InputAnalogRight && ev.InputValue == dir
 }
 
 func New() *GamePad {

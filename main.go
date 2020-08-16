@@ -52,7 +52,7 @@ func handleLockFile() {
 
 func main() {
 	for {
-		mode := ModeKeyb
+		mode := ModeMouse
 		gpad := gamepad.New()
 		xd := xdo.New()
 
@@ -63,17 +63,9 @@ func main() {
 			if !event.Pressed {
 				return
 			}
-			if gpad.IsButtonDown(gamepad.ButtonL) {
-				if event.IsButton(gamepad.ButtonY) {
-					xd.KeyPress("d")
-				} else if event.IsButton(gamepad.ButtonX) {
-					xd.KeyPress("c")
-				} else if event.IsButton(gamepad.ButtonB) {
-					xd.KeyPress("s")
-				} else if event.IsButton(gamepad.ButtonA) {
-					xd.KeyPress("r")
-				}
-			} else if gpad.IsButtonDown(gamepad.ButtonR) {
+
+			if gpad.IsButtonDown(gamepad.ButtonL) && gpad.IsButtonDown(gamepad.ButtonR) {
+			} else if gpad.IsButtonDown(gamepad.ButtonL) {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("h")
 				} else if event.IsButton(gamepad.ButtonX) {
@@ -83,26 +75,15 @@ func main() {
 				} else if event.IsButton(gamepad.ButtonA) {
 					xd.KeyPress("n")
 				} else if event.IsDpad(gamepad.DirLeft) {
-					xd.KeyPress("BackSpace")
-				} else if event.IsDpad(gamepad.DirRight) {
-					xd.KeyPress("space")
-				} else if event.IsDpad(gamepad.DirUp) {
-					// capslock/shift
-					// xd.ToggleUpperCase()
-				} else if event.IsDpad(gamepad.DirDown) {
-					xd.KeyPress("Return")
-				}
-			} else if gpad.IsShoulderDown(gamepad.ShoulderL) {
-				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("g")
-				} else if event.IsButton(gamepad.ButtonX) {
+				} else if event.IsDpad(gamepad.DirUp) {
 					xd.KeyPress("b")
-				} else if event.IsButton(gamepad.ButtonB) {
+				} else if event.IsDpad(gamepad.DirDown) {
 					xd.KeyPress("w")
-				} else if event.IsButton(gamepad.ButtonA) {
+				} else if event.IsDpad(gamepad.DirRight) {
 					xd.KeyPress("f")
 				}
-			} else if gpad.IsShoulderDown(gamepad.ShoulderR) {
+			} else if gpad.IsButtonDown(gamepad.ButtonR) {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("y")
 				} else if event.IsButton(gamepad.ButtonX) {
@@ -111,18 +92,16 @@ func main() {
 					xd.KeyPress("u")
 				} else if event.IsButton(gamepad.ButtonA) {
 					xd.KeyPress("m")
+				} else if event.IsDpad(gamepad.DirLeft) {
+					xd.KeyPress("q")
+				} else if event.IsDpad(gamepad.DirUp) {
+					xd.KeyPress("z")
+				} else if event.IsDpad(gamepad.DirDown) {
+					xd.KeyPress("v")
+				} else if event.IsDpad(gamepad.DirRight) {
+					xd.KeyPress("x")
 				}
-			} else if gpad.IsLeftAnalog(gamepad.DirUp) {
-				if event.IsButton(gamepad.ButtonY) {
-					xd.KeyPress("1")
-				} else if event.IsButton(gamepad.ButtonX) {
-					xd.KeyPress("2")
-				} else if event.IsButton(gamepad.ButtonB) {
-					xd.KeyPress("3")
-				} else if event.IsButton(gamepad.ButtonA) {
-					xd.KeyPress("4")
-				}
-			} else if gpad.IsLeftAnalog(gamepad.DirDown) {
+			} else if gpad.IsShoulderDown(gamepad.ShoulderL) {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("5")
 				} else if event.IsButton(gamepad.ButtonX) {
@@ -131,27 +110,45 @@ func main() {
 					xd.KeyPress("7")
 				} else if event.IsButton(gamepad.ButtonA) {
 					xd.KeyPress("8")
+				} else if event.IsDpad(gamepad.DirLeft) {
+					xd.KeyPress("1")
+				} else if event.IsDpad(gamepad.DirUp) {
+					xd.KeyPress("2")
+				} else if event.IsDpad(gamepad.DirDown) {
+					xd.KeyPress("3")
+				} else if event.IsDpad(gamepad.DirRight) {
+					xd.KeyPress("4")
 				}
-			} else if gpad.IsLeftAnalog(gamepad.DirLeft) {
+			} else if gpad.IsShoulderDown(gamepad.ShoulderR) {
 				if event.IsButton(gamepad.ButtonY) {
-					xd.KeyPress("q")
-				} else if event.IsButton(gamepad.ButtonX) {
-					xd.KeyPress("z")
-				} else if event.IsButton(gamepad.ButtonB) {
-					xd.KeyPress("v")
-				} else if event.IsButton(gamepad.ButtonA) {
-					xd.KeyPress("x")
-				}
-			} else if gpad.IsLeftAnalog(gamepad.DirRight) {
-				if event.IsButton(gamepad.ButtonY) {
-					xd.KeyPress("9")
-				} else if event.IsButton(gamepad.ButtonX) {
 					xd.KeyPress("0")
+				} else if event.IsButton(gamepad.ButtonX) {
+					xd.KeyPress("9")
 				} else if event.IsButton(gamepad.ButtonB) {
 					xd.KeyPress("k")
 				} else if event.IsButton(gamepad.ButtonA) {
 					xd.KeyPress("j")
+				} else if event.IsDpad(gamepad.DirLeft) {
+					xd.KeyPress("BackSpace")
+				} else if event.IsDpad(gamepad.DirUp) {
+					xd.KeyPress("Delete")
+				} else if event.IsDpad(gamepad.DirDown) {
+					xd.KeyPress("Return")
+				} else if event.IsDpad(gamepad.DirRight) {
+					xd.KeyPress("space")
 				}
+			} else if gpad.IsLeftAnalog(gamepad.DirUp) {
+			} else if gpad.IsLeftAnalog(gamepad.DirDown) {
+			} else if gpad.IsLeftAnalog(gamepad.DirLeft) {
+				if event.IsButton(gamepad.ButtonY) {
+					xd.EnterText("ä")
+				} else if event.IsButton(gamepad.ButtonX) {
+					xd.EnterText("ö")
+				} else if event.IsButton(gamepad.ButtonB) {
+					xd.EnterText("å")
+				} else if event.IsButton(gamepad.ButtonA) {
+				}
+			} else if gpad.IsLeftAnalog(gamepad.DirRight) {
 			} else {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("a")
@@ -162,18 +159,22 @@ func main() {
 				} else if event.IsButton(gamepad.ButtonA) {
 					xd.KeyPress("t")
 				} else if event.IsDpad(gamepad.DirLeft) {
-					xd.KeyPress("Left")
-				} else if event.IsDpad(gamepad.DirRight) {
-					xd.KeyPress("Right")
+					xd.KeyPress("d")
 				} else if event.IsDpad(gamepad.DirUp) {
-					xd.KeyPress("Up")
+					xd.KeyPress("c")
 				} else if event.IsDpad(gamepad.DirDown) {
-					xd.KeyPress("Down")
+					xd.KeyPress("s")
+				} else if event.IsDpad(gamepad.DirRight) {
+					xd.KeyPress("r")
 				} else if event.IsButton(gamepad.ButtonSelect) {
 					mode = ModeMouse
 					beeep.Notify("mouse", "", "")
 				} else if event.IsButton(gamepad.ButtonStart) {
 					xd.KeyPress("Escape")
+				} else if event.IsButton(gamepad.ButtonLeftStick) {
+					xd.ToggleCtrl()
+				} else if event.IsButton(gamepad.ButtonRightStick) {
+					xd.ToggleAlt()
 				}
 			}
 		}
@@ -187,6 +188,10 @@ func main() {
 				if event.IsButton(gamepad.ButtonSelect) {
 					mode = ModeKeyb
 					beeep.Notify("keyboard", "", "")
+				} else if gpad.IsShoulderDown(gamepad.ShoulderL) && gpad.IsRightAnalog(gamepad.DirLeft) {
+					xd.KeyPress("Alt_L+Left")
+				} else if gpad.IsShoulderDown(gamepad.ShoulderL) && gpad.IsRightAnalog(gamepad.DirRight) {
+					xd.KeyPress("Alt_L+Right")
 				}
 			}
 		}

@@ -38,6 +38,7 @@ func (gpad *GamePad) StartLoop() {
 			if ev = gpad.Read(); ev == nil {
 				break
 			}
+			ev.gpad = gpad
 			ev.Pressed = ev.Value != 0
 
 			if ev.Type == JsEventButton {
@@ -98,11 +99,11 @@ func (gpad *GamePad) StartLoop() {
 					} else {
 						if gpad.IsButtonDown(DirRight) {
 							ev.SetInput(InputDpad, DirRight)
-							gpad.SetDpadState(DirRight, false)
 						} else if gpad.IsButtonDown(DirLeft) {
 							ev.SetInput(InputDpad, DirLeft)
-							gpad.SetDpadState(DirLeft, false)
 						}
+						gpad.SetDpadState(DirRight, false)
+						gpad.SetDpadState(DirLeft, false)
 					}
 				} else if ev.Number == 7 {
 					if ev.Value == -32767 {
@@ -116,16 +117,18 @@ func (gpad *GamePad) StartLoop() {
 					} else {
 						if gpad.IsButtonDown(DirUp) {
 							ev.SetInput(InputDpad, DirUp)
-							gpad.SetDpadState(DirUp, false)
 						} else if gpad.IsButtonDown(DirDown) {
 							ev.SetInput(InputDpad, DirDown)
-							gpad.SetDpadState(DirDown, false)
 						}
+						gpad.SetDpadState(DirUp, false)
+						gpad.SetDpadState(DirDown, false)
 					}
 				}
 			}
 
-			c <- ev
+			if ev != nil {
+				c <- ev
+			}
 		}
 
 		close(c)
