@@ -1,0 +1,19 @@
+
+// The button layout feels imbalanced,
+// too much strain on my right thumb
+// Instead of just using the alpha buttons,
+// I should also use the dpad for letter insertion
+// with bl,br,sl + dpad,alpha = 24k combinations
+
+// alpha:    aoet
+// dpad:     dcsr
+// BL+alpha: hlin
+// BL+dpad:  gbwf
+// BR+alpha: ypum
+// BR+dpad:  qzvx
+// SL+alpha: 1234
+// SL+dpad:  5678
+// SR+alpha: kj09
+// SR+dpad:  <BS><DEL><ENTER><SPC>
+
+// sr + dpad = arrow keys

@@ -61,7 +61,7 @@ const (
 )
 
 const (
-	DirLeft = iota
+	DirLeft = iota + 1
 	DirRight
 	DirUp
 	DirDown
@@ -75,11 +75,13 @@ const (
 type EventHandler func(event *Event)
 
 type GamePad struct {
-	event C.struct_js_event
+	event        C.struct_js_event
+	eventChannel chan *Event
 
-	FD       uintptr
-	State    State
-	handlers []EventHandler
+	FD        uintptr
+	State     State
+	handlers  []EventHandler
+	LastEvent *Event
 }
 
 type State struct {
@@ -154,6 +156,45 @@ func (gpad *GamePad) Read() *Event {
 		Type:   uint8(gpad.event._type),
 		Number: uint8(gpad.event.number),
 		Value:  int16(gpad.event.value),
+	}
+}
+
+func (gpad *GamePad) GetAnalogDirection(left bool, horizontal bool) uint8 {
+	var stick Vec
+	if left {
+		stick = gpad.State.LeftStick
+	} else {
+		stick = gpad.State.RightStick
+	}
+	if horizontal {
+		if stick.X <= -16383 {
+			return DirLeft
+		} else if stick.X >= 16383 {
+			return DirRight
+		}
+	} else {
+		if stick.Y <= -16383 {
+			return DirUp
+		} else if stick.Y >= 16383 {
+			return DirDown
+		}
+	}
+	return 0
+}
+
+func (gpad *GamePad) SetAnalogState(left bool, horizontal bool, val int16) {
+	if left {
+		if horizontal {
+			gpad.State.LeftStick.X = val
+		} else {
+			gpad.State.LeftStick.Y = val
+		}
+	} else {
+		if horizontal {
+			gpad.State.RightStick.X = val
+		} else {
+			gpad.State.RightStick.Y = val
+		}
 	}
 }
 

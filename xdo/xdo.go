@@ -4,7 +4,11 @@ package xdo
 // #include <xdo.h>
 // #cgo LDFLAGS: -lxdo
 import "C"
-import "unsafe"
+import (
+	"strings"
+	"unicode"
+	"unsafe"
+)
 
 const CURRENTWINDOW = 0
 
@@ -25,9 +29,10 @@ const (
 type Window int
 
 type Xdo struct {
-	xdo      *C.xdo_t
-	ctrlDown bool
-	altDown  bool
+	xdo       *C.xdo_t
+	ctrlDown  bool
+	altDown   bool
+	shiftDown bool
 
 	Window   int
 	KeyDelay int
@@ -64,6 +69,9 @@ func (t *Xdo) MouseClick(mouseButton int) {
 }
 
 func (t *Xdo) KeyPress(keyseq string) {
+	if t.shiftDown && isLetter(keyseq) {
+		keyseq = strings.ToUpper(keyseq)
+	}
 	if t.ctrlDown {
 		keyseq = "Control_L+" + keyseq
 	}
@@ -71,8 +79,8 @@ func (t *Xdo) KeyPress(keyseq string) {
 		keyseq = "Alt_L+" + keyseq
 	}
 	str := C.CString(keyseq)
-	t.ctrlDown = false
-	t.altDown = false
+	//t.ctrlDown = false
+	//t.altDown = false
 	defer C.free(unsafe.Pointer(str))
 	C.xdo_send_keysequence_window(t.xdo, C.Window(t.Window), str, C.useconds_t(t.KeyDelay))
 }
@@ -83,10 +91,31 @@ func (t *Xdo) EnterText(text string) {
 	C.xdo_enter_text_window(t.xdo, C.Window(t.Window), str, C.useconds_t(t.KeyDelay))
 }
 
+func (t *Xdo) SetCtrl(val bool) {
+	t.ctrlDown = val
+}
+func (t *Xdo) SetShift(val bool) {
+	t.shiftDown = val
+}
+func (t *Xdo) ToggleCapsLock() {
+	t.shiftDown = !t.shiftDown
+}
 func (t *Xdo) ToggleCtrl() {
 	t.ctrlDown = !t.ctrlDown
 }
 
 func (t *Xdo) ToggleAlt() {
 	t.altDown = !t.altDown
+}
+
+func (t *Xdo) IsCapsLock() bool {
+	return t.shiftDown
+}
+
+func isLetter(s string) bool {
+	if len(s) != 1 {
+		return false
+	}
+	c := s[0]
+	return unicode.IsLetter(rune(c))
 }

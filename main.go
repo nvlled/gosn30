@@ -52,7 +52,7 @@ func handleLockFile() {
 
 func main() {
 	for {
-		mode := ModeMouse
+		mode := ModeKeyb
 		gpad := gamepad.New()
 		xd := xdo.New()
 
@@ -60,11 +60,34 @@ func main() {
 		go gpad.StartLoop()
 
 		processKeyInput := func(event *gamepad.Event) {
+			// TODO:
+			//fmt.Printf("pressed: %v, type=%v, dir=%v | %v, %v\n", event.Pressed, event.InputType, event.InputValue, gamepad.InputAnalogLeft, gamepad.DirUp)
+			if event.IsLeftAnalog(gamepad.DirUp) {
+				xd.SetShift(event.Pressed)
+			} else if event.IsRightAnalog(gamepad.DirUp) {
+				xd.SetShift(event.Pressed)
+			}
+
+			if event.IsLeftAnalog(gamepad.DirRight) {
+				fmt.Printf(">ctrl: %v\n", event.Pressed)
+				xd.SetCtrl(event.Pressed)
+			}
+
 			if !event.Pressed {
 				return
 			}
+			println("X")
 
 			if gpad.IsButtonDown(gamepad.ButtonL) && gpad.IsButtonDown(gamepad.ButtonR) {
+				if event.IsDpad(gamepad.DirLeft) {
+					xd.KeyPress("Left")
+				} else if event.IsDpad(gamepad.DirUp) {
+					xd.KeyPress("Up")
+				} else if event.IsDpad(gamepad.DirDown) {
+					xd.KeyPress("Down")
+				} else if event.IsDpad(gamepad.DirRight) {
+					xd.KeyPress("Right")
+				}
 			} else if gpad.IsButtonDown(gamepad.ButtonL) {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("h")
@@ -137,8 +160,6 @@ func main() {
 				} else if event.IsDpad(gamepad.DirRight) {
 					xd.KeyPress("space")
 				}
-			} else if gpad.IsLeftAnalog(gamepad.DirUp) {
-			} else if gpad.IsLeftAnalog(gamepad.DirDown) {
 			} else if gpad.IsLeftAnalog(gamepad.DirLeft) {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.EnterText("ä")
@@ -148,7 +169,15 @@ func main() {
 					xd.EnterText("å")
 				} else if event.IsButton(gamepad.ButtonA) {
 				}
-			} else if gpad.IsLeftAnalog(gamepad.DirRight) {
+			} else if gpad.IsRightAnalog(gamepad.DirLeft) {
+				if event.IsDpad(gamepad.DirLeft) {
+					xd.KeyPress("period")
+				} else if event.IsDpad(gamepad.DirUp) {
+					xd.KeyPress("comma")
+				} else if event.IsDpad(gamepad.DirDown) {
+					xd.KeyPress("colon")
+				} else if event.IsDpad(gamepad.DirRight) {
+				}
 			} else {
 				if event.IsButton(gamepad.ButtonY) {
 					xd.KeyPress("a")
@@ -170,7 +199,12 @@ func main() {
 					mode = ModeMouse
 					beeep.Notify("mouse", "", "")
 				} else if event.IsButton(gamepad.ButtonStart) {
-					xd.KeyPress("Escape")
+					xd.ToggleCapsLock()
+					if xd.IsCapsLock() {
+						beeep.Notify("uppercase", "", "")
+					} else {
+						beeep.Notify("lowercase", "", "")
+					}
 				} else if event.IsButton(gamepad.ButtonLeftStick) {
 					xd.ToggleCtrl()
 				} else if event.IsButton(gamepad.ButtonRightStick) {
@@ -192,17 +226,75 @@ func main() {
 					xd.KeyPress("Alt_L+Left")
 				} else if gpad.IsShoulderDown(gamepad.ShoulderL) && gpad.IsRightAnalog(gamepad.DirRight) {
 					xd.KeyPress("Alt_L+Right")
+				} else if event.IsDpad(gamepad.DirLeft) {
+					xd.KeyPress("Left")
+				} else if event.IsDpad(gamepad.DirUp) {
+					xd.KeyPress("Up")
+				} else if event.IsDpad(gamepad.DirDown) {
+					xd.KeyPress("Down")
+				} else if event.IsDpad(gamepad.DirRight) {
+					xd.KeyPress("Right")
 				}
 			}
 		}
 
+		keyChan := make(chan *gamepad.Event)
 		gpad.Poll(func(event *gamepad.Event) {
 			if mode == ModeMouse {
 				processMouseInput(event)
 			} else {
-				processKeyInput(event)
+				keyChan <- event
 			}
 		})
+		go func() {
+			for {
+				processKeyInput(<-keyChan)
+			}
+		}()
+		/*
+			go func() {
+				buttonDown := false
+				downTime := time.Now().UnixNano()
+				micros := int64(1000 * 1000)
+				for {
+					time.Sleep(100 * time.Millisecond)
+					lastEvent := gpad.LastEvent
+
+					if mode != ModeKeyb || lastEvent == nil {
+						continue
+					}
+
+					eventVal := lastEvent.InputValue
+					if eventVal == gamepad.ButtonL ||
+						eventVal == gamepad.ButtonR {
+						continue
+					}
+					if lastEvent.InputType != gamepad.InputDpad && lastEvent.InputType != gamepad.InputButton {
+						continue
+					}
+
+					if !lastEvent.Pressed {
+						buttonDown = false
+						continue
+					}
+
+					if !buttonDown && lastEvent.Pressed {
+						downTime = time.Now().UnixNano()
+						buttonDown = true
+					} else {
+						buttonDown = lastEvent.Pressed
+						now := time.Now().UnixNano()
+						if buttonDown {
+							if (now-downTime)/micros > 1200 {
+								//fmt.Printf("button down elapsed: %v\n", (now-downTime)/micros)
+								keyChan <- lastEvent
+							}
+						}
+					}
+
+				}
+			}()
+		*/
 
 		lastScroll := time.Now().UnixNano()
 		for {
